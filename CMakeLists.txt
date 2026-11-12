@@ -135,6 +135,13 @@ else()
   set(TENSTORRENT_SUPPORT_DEFAULT OFF)
 endif()
 
+# The hipmac backend only reads a file (the metrics page of ut4g-usbgpu, an AMD Vega 10 card on a Mac over USB4); on by default on macOS
+if (APPLE)
+  set(HIPMAC_SUPPORT_DEFAULT ON)
+else()
+  set(HIPMAC_SUPPORT_DEFAULT OFF)
+endif()
+
 option(NVIDIA_SUPPORT "Build support for NVIDIA GPUs through libnvml" ${NVIDIA_SUPPORT_DEFAULT})
 option(AMDGPU_SUPPORT "Build support for AMD GPUs through amdgpu driver" ${AMDGPU_SUPPORT_DEFAULT})
 option(RADEON_SUPPORT "Build support for ATI/AMD GPUs through radeon driver" ${RADEON_SUPPORT_DEFAULT})
@@ -151,6 +158,7 @@ option(METAX_SUPPORT "Build support for MetaX GPUs through libmxsml" ${METAX_SUP
 option(ENFLAME_SUPPORT "Build support for Enflame GCUs through libefml" ${ENFLAME_SUPPORT_DEFAULT})
 option(TENSTORRENT_SUPPORT "Build support for Tenstorrent accelerators through tt-kmd" ${TENSTORRENT_SUPPORT_DEFAULT})
 option(IXML_SUPPORT "Build support for Iluvatar CoreX GPUs through libixml" ${IXML_SUPPORT_DEFAULT})
+option(HIPMAC_SUPPORT "Build support for an AMD Vega 10 card driven by the hipmac stack, through its metrics page" ${HIPMAC_SUPPORT_DEFAULT})
 
 add_subdirectory(src)
 

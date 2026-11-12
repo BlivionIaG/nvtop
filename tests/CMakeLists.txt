@@ -24,6 +24,40 @@ if (BUILD_TESTING AND NVIDIA_SUPPORT AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_test(NAME Nvidia.${test_case} COMMAND nvidiaTests ${test_case})
   endforeach()
 endif()
+
+# The hipmac backend tests read fake metrics pages: no card, no GTest
+if (BUILD_TESTING AND HIPMAC_SUPPORT)
+  add_executable(hipmacTests
+    hipmacTests.c
+    ${PROJECT_SOURCE_DIR}/src/extract_gpuinfo.c
+    ${PROJECT_SOURCE_DIR}/src/time.c
+  )
+  if (APPLE)
+    target_sources(hipmacTests PRIVATE
+      ${PROJECT_SOURCE_DIR}/src/extract_processinfo_mac.c
+      ${PROJECT_SOURCE_DIR}/src/get_process_info_mac.c)
+  else()
+    target_sources(hipmacTests PRIVATE
+      ${PROJECT_SOURCE_DIR}/src/extract_processinfo_fdinfo.c
+      ${PROJECT_SOURCE_DIR}/src/get_process_info_linux.c)
+  endif()
+  target_include_directories(hipmacTests PRIVATE ${PROJECT_SOURCE_DIR}/include)
+  target_compile_definitions(hipmacTests PRIVATE _GNU_SOURCE)
+  if (HAS_REALLOCARRAY)
+    target_compile_definitions(hipmacTests PRIVATE HAS_REALLOCARRAY)
+  endif()
+  set_property(TARGET hipmacTests PROPERTY C_STANDARD 11)
+  target_link_libraries(hipmacTests PRIVATE m ${CMAKE_DL_LIBS})
+  add_sanitizers(hipmacTests)
+  foreach (test_case broker_page version1_page stale_page missing_page bad_pages client_page)
+    add_test(NAME Hipmac.${test_case} COMMAND hipmacTests ${test_case})
+  endforeach()
+
+  # a live fake page to run nvtop against (hipmac_fake_page <file> [clients]); not installed
+  add_executable(hipmac_fake_page hipmac_fake_page.c)
+  target_include_directories(hipmac_fake_page PRIVATE ${PROJECT_SOURCE_DIR}/include)
+  set_property(TARGET hipmac_fake_page PROPERTY C_STANDARD 11)
+endif()
 if (BUILD_TESTING AND GTest_FOUND)
 
   option(THOROUGH_TESTING "Enable extensive testing (takes hours, e.g., use once per release)" OFF)
