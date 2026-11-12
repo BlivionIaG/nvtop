@@ -211,6 +211,11 @@ if(IXML_SUPPORT)
   target_sources(nvtop PRIVATE extract_gpuinfo_ixml.c)
 endif()
 
+if(HIPMAC_SUPPORT)
+  message(STATUS "Building with hipmac (Vega 10 over USB4) support")
+  target_sources(nvtop PRIVATE extract_gpuinfo_hipmac.c)
+endif()
+
 target_include_directories(nvtop PRIVATE
   ${PROJECT_SOURCE_DIR}/include
   ${PROJECT_BINARY_DIR}/include)

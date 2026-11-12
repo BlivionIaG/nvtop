@@ -38,6 +38,7 @@ Table of Contents
   - [MetaX](#metax)
   - [Enflame](#enflame)
   - [Tenstorrent](#tenstorrent)
+  - [Hipmac](#hipmac-amd-vega-10-over-usb4-on-macos)
 - [Build](#build)
 - [Distribution Specific Installation Process](#distribution-specific-installation-process)
   - [Ubuntu / Debian](#ubuntu--debian)
@@ -208,6 +209,14 @@ GCU, which refers to General Compute Unit, is a type of accelerator card that is
 NVTOP supports Tenstorrent AI accelerators (Blackhole, Wormhole, Grayskull) through the [tt-kmd](https://github.com/tenstorrent/tt-kmd) kernel driver.
 
 Supports temperature, power draw, AI clock, fan RPM, PCIe link info, and process listing. No external libraries required -- all data is read from sysfs, hwmon, and procfs.
+
+### Hipmac (AMD Vega 10 over USB4 on macOS)
+
+macOS has no AMD driver, so an AMD Vega 10 card in a USB4/Thunderbolt enclosure, driven by the hipmac stack (ut4g-usbgpu), has no sysfs or DRM node for NVTOP to read. The process that owns the card (a client of its device library started with `UT4G_METRICS=1`, or the `ut4gd` daemon shared by several clients) publishes its telemetry into a small file, `$UT4G_METRICS_PAGE` (default `$TMPDIR/ut4g-metrics.page`), and NVTOP reads that file: no root, no library, the card is never touched.
+
+Supports GPU load and clocks (graphics, memory, SoC), temperature, fan, package power and its limit, VRAM total/used, host-to-device and device-to-host link throughput (copies counted by the owner), and the list of the processes that use the card (per-process VRAM and busy share). The device is listed when a page exists at start; set `NVTOP_HIPMAC_ALWAYS=1` to list it before a client is running (its fields read N/A until a page is published, and while the page is stale).
+
+Built by default on macOS, enable elsewhere with `-DHIPMAC_SUPPORT=ON`.
 
 Build
 -----
